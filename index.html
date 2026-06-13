@@ -44,7 +44,7 @@
   }
 
   /* Header */
-  header { background: rgba(14,14,14,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(var(--safe-top) + 16px) 18px 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--black-border); }
+  header { background: rgba(14,14,14,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(var(--safe-top) + 16px) 18px 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--black-border); overflow: visible; }
   .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 
   .logo-text { display:flex; flex-direction:column; line-height:1; }
@@ -430,7 +430,7 @@
 <body>
 
 <header>
-  <!-- Desktop header -->
+  <!-- Desktop header v2 -->
   <div class="desktop-header header-inner">
     <div class="stripe-top" style="height:2px;background:linear-gradient(90deg,#5a6070,#c8cdd6,transparent);"></div>
     <div class="desktop-hero" style="position:relative;">
@@ -456,8 +456,8 @@
   <div class="mobile-header">
     
           <div class="header-inner"><div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 12px;overflow:visible;">
-      <div style="display:flex;align-items:center;gap:1px;line-height:1.4;padding-top:8px;overflow:visible;">
-        <span style="font-family:'Blacksword',cursive;font-size:1.9rem;color:#f0f2f5;letter-spacing:0.02em;display:block;">Mangia</span><span style="font-family:'Blacksword',cursive;font-size:1.9rem;background:linear-gradient(135deg,#8a90a0,#c8cdd6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.02em;display:block;">Bhai</span>
+      <div style="display:flex;align-items:flex-end;gap:0;padding:10px 0 4px;overflow:visible;white-space:nowrap;">
+        <span style="font-family:'Blacksword',cursive;font-size:1.7rem;color:#f0f2f5;letter-spacing:0.01em;line-height:2;">Mangia</span><span style="font-family:'Blacksword',cursive;font-size:1.7rem;background:linear-gradient(135deg,#8a90a0,#c8cdd6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.01em;line-height:2;">Bhai</span>
       </div>
       <button class="btn-icon" title="API Key" onclick="openKeyModal()">🔑</button>
     </div>
