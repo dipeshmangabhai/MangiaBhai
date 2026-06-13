@@ -385,7 +385,7 @@
     .desktop-hero-illus { height: 90px; width: auto; flex-shrink: 0; position: relative; z-index: 1; }
     .desktop-hero-text { position: relative; z-index: 1; }
     .desktop-wordmark { font-family: 'Blacksword', cursive; font-size: 2.6rem; line-height: 1.8; display: block; padding: 14px 24px 0 0; overflow: visible; }
-    .desktop-tagline { color: var(--steel-light); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin-top: 4px; display: block; opacity: 0.75; }
+    .desktop-tagline { color: var(--steel-light); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 6px; display: block; opacity: 0.85; }
     
     .desktop-tagline { color: var(--steel-light); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; display: block; opacity: 0.7; }
     .desktop-header-actions { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); z-index: 2; }
@@ -472,7 +472,7 @@
           <div class="header-inner"><div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 12px;overflow:visible;min-height:60px;">
       <div>
         <div class="site-wordmark"><span class="wm-white">Mangia</span><span class="wm-steel">Bhai</span></div>
-        <div style="font-size:0.55rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--steel);opacity:0.7;margin-top:2px;">Eat well, brother</div>
+        <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--steel-light);opacity:0.85;margin-top:3px;">Eat well, brother</div>
       </div>
       <button class="btn-icon" title="API Key" onclick="openKeyModal()">🔑</button>
     </div>
@@ -2669,7 +2669,7 @@ async function generateExportCanvas(r) {
   tc.font = '29px Arial';
   (r.steps || []).forEach(s => { estH += Math.max(1, Math.ceil(tc.measureText(s).width / (COL - 60))) * 40 + 24; });
   if (r.notes) estH += 160;
-  estH += 120;
+  estH += 100;
 
   const H = Math.ceil(estH / 100) * 100 + 100;
   const canvas = document.getElementById('export-canvas');
@@ -2825,18 +2825,28 @@ async function generateExportCanvas(r) {
     y += noteH + 30;
   }
 
-  // Footer
-  ctx.fillStyle='#0d0f14'; ctx.fillRect(0,H-90,W,90);
-  ctx.fillStyle='#1a1c22'; ctx.fillRect(0,H-91,W,1);
+  // Footer — tight to content
+  const footerH = 80;
+  const footerY = y + 20;
+  const finalH = footerY + footerH;
+  canvas.height = finalH;
+
+  // Redraw background for new height
+  ctx.fillStyle = '#0e0e0e';
+  ctx.fillRect(0, y + 20, W, footerH);
+
+  ctx.fillStyle='#0d0f14'; ctx.fillRect(0, footerY, W, footerH);
+  ctx.fillStyle='#1a1c22'; ctx.fillRect(0, footerY, W, 1);
   const fs=ctx.createLinearGradient(0,0,W*0.55,0);
   fs.addColorStop(0,'#5a6070'); fs.addColorStop(1,'rgba(200,205,214,0)');
-  ctx.fillStyle=fs; ctx.fillRect(0,H-90,W,3);
+  ctx.fillStyle=fs; ctx.fillRect(0, footerY, W, 3);
   ctx.fillStyle='#5a6070'; ctx.font='bold 24px Arial';
   ctx.textAlign='center';
-  ctx.fillText('MangiaBhai  ·  Eat Well, Live Well', W/2, H-50);
+  ctx.fillText('MangiaBhai  ·  Eat well, brother', W/2, footerY + 42);
   ctx.fillStyle='#3a4050'; ctx.font='20px Arial';
-  ctx.fillText('mangiabhai.vercel.app', W/2, H-20);
+  ctx.fillText('mangiabhai.vercel.app', W/2, footerY + 68);
   ctx.textAlign='left';
+  exportDataUrl = canvas.toDataURL('image/png');
 
   exportDataUrl = canvas.toDataURL('image/png');
 }
