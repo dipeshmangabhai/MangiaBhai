@@ -85,7 +85,7 @@
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: flex-end; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--black-card); border-radius: 24px 24px 0 0; width: 100%; max-height: 93vh; display: flex; flex-direction: column; animation: slideUp 0.3s cubic-bezier(0.22,1,0.36,1); border-top: 1px solid var(--black-border); overflow: hidden; }
-  .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: calc(var(--safe-bottom, 0px) + 40px); min-height: 0; }
+  .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: calc(var(--safe-bottom, 0px) + 40px); min-height: 0; overscroll-behavior: contain; }
   .modal-sticky-header { background: var(--black-card); border-bottom: 1px solid var(--black-border); display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; flex-shrink: 0; }
   .modal-sticky-title { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 50px); }
   @keyframes slideUp { from { transform: translateY(100%); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
@@ -425,13 +425,17 @@
   main { min-height: calc(100dvh - 160px); }
 
   .modal { background: var(--black-card); border-radius: 24px 24px 0 0; width: 100%; max-height: 93vh; display: flex; flex-direction: column; animation: slideUp .3s cubic-bezier(.22,1,.36,1); border-top: 1px solid var(--black-border); overflow: hidden; }
-  .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: calc(var(--safe-bottom, 0px) + 40px); min-height: 0; }
+  .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: calc(var(--safe-bottom, 0px) + 40px); min-height: 0; overscroll-behavior: contain; }
   .modal-sticky-header { position: sticky; top: 0; z-index: 10; background: var(--black-card); border-bottom: 1px solid var(--black-border); display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; flex-shrink: 0; }
   .modal-sticky-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 50px); }
 
   @media (min-width: 768px) {
-    .modal-overlay { align-items: center; justify-content: center; }
-    .modal { border-radius: 20px !important; max-width: 740px !important; max-height: 85vh !important; width: 90% !important; }
+    .modal-overlay { align-items: center !important; justify-content: center !important; }
+    .modal { border-radius: 20px !important; max-width: 740px !important; height: 82vh !important; width: 90% !important; max-height: 82vh !important; }
+    .modal-scroll { overflow-y: auto !important; height: 100% !important; }
+    .modal-handle { display: none; }
+    .modal { animation: fadeIn 0.2s ease !important; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
     .modal-hero { padding: 28px 32px 24px; }
     .modal-body { padding: 24px 32px; }
     .modal-sticky-header { padding: 16px 32px; }
