@@ -2702,21 +2702,21 @@ async function generateExportCanvas(r) {
   // MangiaBhai in Blacksword
   ctx.font = '72px BlackswordCanvas, cursive';
   ctx.fillStyle = '#f0f2f5';
-  ctx.fillText('Mangia', PAD, 100);
+  ctx.fillText('Mangia', PAD, 96);
   const mangiaW = ctx.measureText('Mangia').width;
   ctx.fillStyle = '#a0a8b8';
-  ctx.fillText('Bhai', PAD + mangiaW, 100);
+  ctx.fillText('Bhai', PAD + mangiaW, 96);
 
-  // Tagline
-  ctx.font = 'bold 20px Arial';
-  ctx.fillStyle = '#3a4050';
+  // Tagline — steel light, no overlap
+  ctx.font = 'bold 22px Arial';
+  ctx.fillStyle = '#c8cdd6';
   ctx.letterSpacing = '4px';
-  ctx.fillText('EAT WELL, LIVE WELL', PAD, 128);
+  ctx.fillText('EAT WELL, BROTHER', PAD, 134);
   ctx.letterSpacing = '0px';
 
   // Divider
   ctx.strokeStyle = '#1e2028'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(PAD,148); ctx.lineTo(W-PAD,148); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD, 156); ctx.lineTo(W-PAD, 156); ctx.stroke();
 
   // Emoji — draw via temp canvas to preserve colour
   let y = 166;
