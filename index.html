@@ -85,7 +85,7 @@
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: flex-end; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--black-card); border-radius: 24px 24px 0 0; width: 100%; max-height: 93vh; display: flex; flex-direction: column; animation: slideUp 0.3s cubic-bezier(0.22,1,0.36,1); border-top: 1px solid var(--black-border); overflow: hidden; }
-  .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: calc(var(--safe-bottom) + 30px); }
+  .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: calc(var(--safe-bottom, 0px) + 40px); min-height: 0; }
   .modal-sticky-header { background: var(--black-card); border-bottom: 1px solid var(--black-border); display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; flex-shrink: 0; }
   .modal-sticky-title { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 50px); }
   @keyframes slideUp { from { transform: translateY(100%); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
@@ -425,7 +425,7 @@
   main { min-height: calc(100dvh - 160px); }
 
   .modal { background: var(--black-card); border-radius: 24px 24px 0 0; width: 100%; max-height: 93vh; display: flex; flex-direction: column; animation: slideUp .3s cubic-bezier(.22,1,.36,1); border-top: 1px solid var(--black-border); overflow: hidden; }
-  .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: calc(var(--safe-bottom) + 30px); }
+  .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: calc(var(--safe-bottom, 0px) + 40px); min-height: 0; }
   .modal-sticky-header { position: sticky; top: 0; z-index: 10; background: var(--black-card); border-bottom: 1px solid var(--black-border); display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; flex-shrink: 0; }
   .modal-sticky-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 50px); }
 
@@ -2243,11 +2243,24 @@ function openDetail(id) {
       </div>
     </div>
     </div>`;
-  document.getElementById('detail-modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  const modal = document.getElementById('detail-modal');
+  modal.classList.add('open');
+  // Lock body at current scroll position (fixes iOS Safari viewport bug)
+  const scrollY = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = '100%';
+  document.body.dataset.scrollY = scrollY;
 }
 
-function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); document.body.style.overflow = ''; }
+function closeDetail() {
+  document.getElementById('detail-modal').classList.remove('open');
+  const scrollY = parseInt(document.body.dataset.scrollY || '0');
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, scrollY);
+}
 function closeDetailIfBg(e) { if (e.target === document.getElementById('detail-modal')) closeDetail(); }
 
 async function deleteRecipe(id) {
@@ -2262,10 +2275,22 @@ async function deleteRecipe(id) {
 }
 
 // ── Add Modal ──
-function openAdd() { document.getElementById('add-modal-overlay').classList.add('open'); document.body.style.overflow = 'hidden'; checkKeyRow(); checkKeyRowPhoto(); }
+function openAdd() {
+  document.getElementById('add-modal-overlay').classList.add('open');
+  const scrollY = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = '100%';
+  document.body.dataset.scrollY = scrollY;
+  checkKeyRow(); checkKeyRowPhoto();
+}
 function closeAdd() {
   document.getElementById('add-modal-overlay').classList.remove('open');
-  document.body.style.overflow = '';
+  const scrollY = parseInt(document.body.dataset.scrollY || '0');
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, scrollY);
   document.getElementById('f-paste').value = '';
   document.getElementById('ai-error').style.display = 'none';
   document.getElementById('ai-loading').style.display = 'none';
