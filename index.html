@@ -709,6 +709,33 @@
   </div>
 </div>
 
+
+<!-- Hidden pre-gen canvas -->
+<canvas id="export-canvas-pre" style="display:none;"></canvas>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="export-modal-overlay" onclick="closeExportIfBg(event)">
+  <div class="add-modal" style="max-height:90vh;">
+    <div class="modal-handle"></div>
+    <div class="add-modal-header" style="position:relative;">
+      <button class="modal-close" onclick="closeExport()">✕</button>
+      <div class="add-modal-title">Share Recipe</div>
+      <div class="add-modal-sub">Save as an image to share anywhere</div>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+      <div id="export-loading" style="text-align:center;padding:40px 0;">
+        <div class="ai-spinner"></div>
+        <p style="font-size:.85rem;color:var(--steel-light);margin-top:12px;">Generating recipe card…</p>
+      </div>
+      <div id="export-preview-wrap" style="display:none;border-radius:12px;overflow:hidden;border:1px solid var(--black-border);">
+        <canvas id="export-canvas" style="width:100%;display:block;"></canvas>
+      </div>
+      <button class="btn-save" id="export-share-btn" style="display:none;" onclick="doShare()">↑ Share / Save Image</button>
+      <button class="btn-cancel" onclick="closeExport()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <button class="fab" onclick="openAdd()">＋</button>
 
 <script>
@@ -2102,6 +2129,10 @@ function renderCards() {
     const card = document.createElement('div');
     card.className = 'recipe-card';
     card.onclick = () => openDetail(r.id);
+    card.addEventListener('mouseenter', () => {
+      const recipe = recipes.find(x => x.id === r.id);
+      if (recipe && !exportCache[r.id]) preGenerateExport(recipe);
+    });
     const dc = r.difficulty === 'Easy' ? 'diff-easy' : r.difficulty === 'Medium' ? 'diff-medium' : 'diff-hard';
     card.innerHTML = `
       <div class="card-stripe"></div>
@@ -2202,6 +2233,8 @@ function openDetail(id) {
   // Always scroll modal to top when opening
   const mc = document.getElementById('modal-content');
   if (mc) mc.scrollTop = 0;
+  // Pre-generate export card in background
+  setTimeout(() => preGenerateExport(r), 300);
 }
 
 function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); document.body.style.overflow = ''; }
@@ -2528,6 +2561,314 @@ async function saveEdit() {
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+
+// ── Recipe Card Export ──
+let exportRecipeId = null;
+let exportDataUrl = null;
+
+function roundRectExport(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function wrapTextExport(ctx, text, x, y, maxW, lh) {
+  const words = text.split(' ');
+  let line = '', curY = y;
+  for (let i = 0; i < words.length; i++) {
+    const test = line + words[i] + ' ';
+    if (ctx.measureText(test).width > maxW && i > 0) {
+      ctx.fillText(line.trim(), x, curY);
+      line = words[i] + ' ';
+      curY += lh;
+    } else line = test;
+  }
+  ctx.fillText(line.trim(), x, curY);
+  return curY + lh;
+}
+
+function loadImgExport(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+// Cache of pre-generated export data URLs keyed by recipe id
+const exportCache = {};
+
+async function exportRecipeCard(id) {
+  exportRecipeId = id;
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('export-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // If already pre-generated, show instantly
+  if (exportCache[id]) {
+    exportDataUrl = exportCache[id];
+    showExportReady();
+    return;
+  }
+
+  // Otherwise generate now with loading indicator
+  document.getElementById('export-loading').style.display = 'block';
+  document.getElementById('export-preview-wrap').style.display = 'none';
+  document.getElementById('export-share-btn').style.display = 'none';
+
+  await generateExportCanvas(r);
+  exportCache[id] = exportDataUrl;
+  showExportReady();
+}
+
+function showExportReady() {
+  document.getElementById('export-loading').style.display = 'none';
+  document.getElementById('export-preview-wrap').style.display = 'block';
+  document.getElementById('export-share-btn').style.display = 'block';
+}
+
+async function preGenerateExport(r) {
+  if (!r || exportCache[r.id]) return;
+  try {
+    // Use a separate off-screen canvas for pre-generation
+    const mainCanvas = document.getElementById('export-canvas');
+    await generateExportCanvas(r);
+    exportCache[r.id] = exportDataUrl;
+    // Restore canvas state
+    exportDataUrl = null;
+  } catch(e) { /* silent fail */ }
+}
+
+async function generateExportCanvas(r) {
+  const W = 1080, PAD = 64, COL = W - PAD * 2;
+
+  // Load images
+  const logoImg = await loadImgExport('mangiabhai_logo_transparent.png');
+  const illustImg = await loadImgExport('mangiabhai_illustration.png');
+
+  // Measure height needed
+  const tmp = document.createElement('canvas');
+  tmp.width = W; tmp.height = 10;
+  const tc = tmp.getContext('2d');
+  let estH = 160 + 240 + 100;
+  tc.font = 'bold 68px Georgia';
+  estH += (Math.ceil(tc.measureText(r.name || '').width / COL) || 1) * 82 + 100;
+  tc.font = 'italic 33px Georgia';
+  estH += (Math.ceil(tc.measureText(r.description || '').width / COL) || 1) * 46 + 60;
+  estH += 60 + (r.ingredients || []).length * 50 + 50;
+  tc.font = '29px Arial';
+  (r.steps || []).forEach(s => { estH += Math.max(1, Math.ceil(tc.measureText(s).width / (COL - 60))) * 40 + 24; });
+  if (r.notes) estH += 160;
+  estH += 120;
+
+  const H = Math.ceil(estH / 100) * 100 + 100;
+  const canvas = document.getElementById('export-canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#0e0e0e'; ctx.fillRect(0, 0, W, H);
+  const bg = ctx.createLinearGradient(0,0,W,H*0.4);
+  bg.addColorStop(0,'rgba(90,96,112,0.09)'); bg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+  // Top stripe
+  const sg = ctx.createLinearGradient(0,0,W,0);
+  sg.addColorStop(0,'#5a6070'); sg.addColorStop(0.55,'#c8cdd6'); sg.addColorStop(1,'rgba(200,205,214,0)');
+  ctx.fillStyle = sg; ctx.fillRect(0,0,W,5);
+
+  // Ghost illustration
+  if (illustImg) {
+    const ih = 280, iw = illustImg.width*(ih/illustImg.height);
+    ctx.globalAlpha = 0.08;
+    ctx.drawImage(illustImg, W-iw-10, 10, iw, ih);
+    ctx.globalAlpha = 1;
+  } else {
+    ctx.globalAlpha = 0.07;
+    ctx.strokeStyle = '#a0a8b8'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(W-180,190,140,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(W-180,190,108,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // Logo
+  if (logoImg) {
+    const lh = 72, lw = logoImg.width*(lh/logoImg.height);
+    ctx.drawImage(logoImg, PAD, 28, lw, lh);
+  } else {
+    ctx.fillStyle = '#c8cdd6'; ctx.font = '900 52px Arial';
+    ctx.fillText('MANGIA', PAD, 88);
+    ctx.fillStyle = '#f0f2f5'; ctx.font = 'italic bold 62px Georgia';
+    ctx.fillText('Bhai', PAD+312, 94);
+  }
+
+  // Divider
+  ctx.strokeStyle = '#1e2028'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(PAD,138); ctx.lineTo(W-PAD,138); ctx.stroke();
+
+  // Emoji
+  let y = 166;
+  ctx.font = '100px serif'; ctx.fillText(r.emoji||'🍽️', PAD, y+100);
+
+  // Category pill
+  ctx.fillStyle = 'rgba(90,96,112,0.28)';
+  roundRectExport(ctx,PAD,y+120,190,48,24); ctx.fill();
+  ctx.fillStyle = '#a0a8b8'; ctx.font = 'bold 23px Arial';
+  ctx.textAlign = 'center'; ctx.fillText((r.category||'').toUpperCase(), PAD+95, y+151); ctx.textAlign = 'left';
+
+  // Name
+  y += 240;
+  ctx.fillStyle = '#f0f2f5'; ctx.font = 'bold 68px Georgia, serif';
+  y = wrapTextExport(ctx, r.name||'', PAD, y, COL, 82);
+  y += 16;
+
+  // Meta pills
+  ctx.font = 'bold 27px Arial';
+  let px = PAD;
+  const pills = [];
+  if (r.time) pills.push([`⏱  ${r.time}`, '#c8cdd6']);
+  if (r.difficulty) pills.push([r.difficulty, '#a0a8b8']);
+  pills.forEach(([p,col]) => {
+    const pw = ctx.measureText(p).width + 54;
+    ctx.fillStyle = '#181820'; roundRectExport(ctx,px,y,pw,54,27); ctx.fill();
+    ctx.strokeStyle = '#252830'; ctx.lineWidth=1; roundRectExport(ctx,px,y,pw,54,27); ctx.stroke();
+    ctx.fillStyle = col; ctx.fillText(p, px+27, y+36);
+    px += pw + 18;
+  });
+  y += 82;
+
+  // Description
+  if (r.description) {
+    ctx.fillStyle = '#8a90a0'; ctx.font = 'italic 33px Georgia, serif';
+    y = wrapTextExport(ctx, r.description, PAD, y, COL, 46);
+    y += 20;
+  }
+
+  // Rule
+  ctx.strokeStyle = '#1a1c22'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(PAD,y); ctx.lineTo(W-PAD,y); ctx.stroke();
+  y += 44;
+
+  // Ingredients
+  ctx.fillStyle = '#a0a8b8'; ctx.font = 'bold 25px Arial';
+  ctx.letterSpacing = '3px'; ctx.fillText('INGREDIENTS', PAD, y); ctx.letterSpacing = '0px';
+  ctx.strokeStyle='#1e2028'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(PAD,y+13); ctx.lineTo(W-PAD,y+13); ctx.stroke();
+  y += 50;
+
+  (r.ingredients||[]).forEach((ing, i) => {
+    if (i%2===0) { ctx.fillStyle='rgba(255,255,255,0.022)'; ctx.fillRect(PAD,y-30,COL,48); }
+    ctx.fillStyle='#c8cdd6'; ctx.font='bold 28px Arial'; ctx.fillText(ing.amount||'', PAD, y);
+    ctx.fillStyle='#2e3240'; ctx.fillText('—', PAD+215, y);
+    ctx.fillStyle='#8a90a0'; ctx.font='28px Arial';
+    const itemText = (ing.item||'').length > 44 ? (ing.item||'').substring(0,42)+'…' : (ing.item||'');
+    ctx.fillText(itemText, PAD+244, y);
+    y += 50;
+  });
+  y += 24;
+
+  // Method
+  ctx.fillStyle='#a0a8b8'; ctx.font='bold 25px Arial';
+  ctx.letterSpacing='3px'; ctx.fillText('METHOD', PAD, y); ctx.letterSpacing='0px';
+  ctx.strokeStyle='#1e2028'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(PAD,y+13); ctx.lineTo(W-PAD,y+13); ctx.stroke();
+  y += 50;
+
+  (r.steps||[]).forEach((step, i) => {
+    const cg = ctx.createLinearGradient(PAD,y-20,PAD+40,y+20);
+    cg.addColorStop(0,'#3a4050'); cg.addColorStop(1,'#5a6070');
+    ctx.fillStyle=cg;
+    ctx.beginPath(); ctx.arc(PAD+20,y-8,20,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#c8cdd6'; ctx.font='bold 20px Arial';
+    ctx.textAlign='center'; ctx.fillText(i+1, PAD+20, y-1); ctx.textAlign='left';
+    ctx.fillStyle='#9a9faa'; ctx.font='29px Arial';
+    y = wrapTextExport(ctx, step, PAD+54, y, COL-58, 40);
+    y += 14;
+  });
+  y += 20;
+
+  // Tip — pastel gold
+  if (r.notes) {
+    tc.font = '27px Arial';
+    const noteLines = Math.max(1, Math.ceil(tc.measureText(r.notes).width / (COL-52)));
+    const noteH = 52 + noteLines * 36 + 28;
+    ctx.fillStyle='rgba(201,168,76,0.10)';
+    roundRectExport(ctx,PAD,y,COL,noteH,14); ctx.fill();
+    ctx.strokeStyle='rgba(201,168,76,0.28)'; ctx.lineWidth=1;
+    roundRectExport(ctx,PAD,y,COL,noteH,14); ctx.stroke();
+    ctx.fillStyle='#c9a84c';
+    roundRectExport(ctx,PAD,y,4,noteH,2); ctx.fill();
+    ctx.fillStyle='#c9a84c'; ctx.font='bold 26px Arial';
+    ctx.fillText('💡  Tip', PAD+24, y+38);
+    ctx.fillStyle='rgba(210,178,80,0.9)'; ctx.font='italic 27px Arial';
+    wrapTextExport(ctx, r.notes, PAD+24, y+74, COL-52, 36);
+    y += noteH + 30;
+  }
+
+  // Footer
+  ctx.fillStyle='#0d0f14'; ctx.fillRect(0,H-90,W,90);
+  ctx.fillStyle='#1a1c22'; ctx.fillRect(0,H-91,W,1);
+  const fs=ctx.createLinearGradient(0,0,W*0.55,0);
+  fs.addColorStop(0,'#5a6070'); fs.addColorStop(1,'rgba(200,205,214,0)');
+  ctx.fillStyle=fs; ctx.fillRect(0,H-90,W,3);
+  ctx.fillStyle='#5a6070'; ctx.font='bold 24px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('MangiaBhai  ·  Eat Well, Live Well', W/2, H-50);
+  ctx.fillStyle='#3a4050'; ctx.font='20px Arial';
+  ctx.fillText('mangiabhai.vercel.app', W/2, H-20);
+  ctx.textAlign='left';
+
+  exportDataUrl = canvas.toDataURL('image/png');
+}
+
+async function doShare() {
+  if (!exportDataUrl) return;
+  const r = recipes.find(x => x.id === exportRecipeId);
+  const filename = (r ? r.name.replace(/[^a-z0-9]/gi,'_') : 'recipe') + '_mangiabhai.png';
+
+  // Try native share sheet first (mobile)
+  if (navigator.share && navigator.canShare) {
+    try {
+      const res = await fetch(exportDataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: r ? r.name : 'Recipe' });
+        closeExport();
+        return;
+      }
+    } catch(e) { /* fall through to download */ }
+  }
+
+  // Desktop fallback — download
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = exportDataUrl;
+  link.click();
+  closeExport();
+}
+
+function closeExport() {
+  document.getElementById('export-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  exportRecipeId = null;
+  exportDataUrl = null;
+}
+
+function closeExportIfBg(e) {
+  if (e.target === document.getElementById('export-modal-overlay')) closeExport();
 }
 
 // ── Init ──
