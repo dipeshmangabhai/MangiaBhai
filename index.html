@@ -36,7 +36,7 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-  body { background: var(--black); color: var(--white); font-family: 'Lato', sans-serif; font-weight: 300; min-height: 100vh; overflow-x: hidden; }
+  body { background: var(--black); color: var(--white); font-family: 'Lato', sans-serif; font-weight: 300; min-height: 100vh; }
   body::before {
     content: ''; position: fixed; inset: 0;
     background-image: radial-gradient(circle at 20px 20px, rgba(255,255,255,0.025) 12px, transparent 12px), radial-gradient(circle at 60px 60px, rgba(255,255,255,0.015) 8px, transparent 8px);
@@ -385,7 +385,9 @@
     .desktop-hero-illus { height: 90px; width: auto; flex-shrink: 0; position: relative; z-index: 1; }
     .desktop-hero-text { position: relative; z-index: 1; }
     .desktop-wordmark { font-family: 'Blacksword', cursive; font-size: 2.6rem; line-height: 1.8; display: block; padding: 14px 24px 0 0; overflow: visible; }
-    .desktop-tagline { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: #5a6070; margin-top: 5px; display: block; }
+    .desktop-tagline { color: var(--steel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; display: block; opacity: 0.8; }
+    .desktop-tagline-OLD { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: #5a6070; margin-top: 5px; display: block; }
+    .desktop-tagline { color: var(--steel-light); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; display: block; opacity: 0.7; }
     .desktop-header-actions { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); z-index: 2; }
 }
 
@@ -403,8 +405,8 @@
   /* ── Site Wordmark ── */
   .site-wordmark {
     display: inline-block;
-    line-height: 1;
-    padding: 0.3em 0.2em 0.1em 0;
+    line-height: normal;
+    padding: 8px 4px 4px 0;
     overflow: visible;
   }
   .site-wordmark .wm-white {
@@ -412,17 +414,12 @@
     font-size: 1.5rem;
     color: #f0f2f5;
     display: inline;
-    line-height: 1;
   }
   .site-wordmark .wm-steel {
     font-family: 'Blacksword', cursive;
     font-size: 1.5rem;
-    background: linear-gradient(135deg, #8a90a0, #c8cdd6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #a0a8b8;
     display: inline;
-    line-height: 1;
   }
   @media (min-width: 768px) {
     .site-wordmark .wm-white,
@@ -443,7 +440,7 @@
       
       <div class="desktop-hero-text">
         <div class="site-wordmark"><span class="wm-white">Mangia</span><span class="wm-steel">Bhai</span></div>
-        <span style="font-size:0.65rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#5a6070;margin-top:4px;display:block;">Eat Well, Live Well</span>
+
       </div>
       <div class="desktop-header-actions">
         <button class="btn-icon" title="API Key" onclick="openKeyModal()">🔑</button>
