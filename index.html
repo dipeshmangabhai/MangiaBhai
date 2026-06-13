@@ -385,9 +385,7 @@
     .desktop-hero-illus { height: 90px; width: auto; flex-shrink: 0; position: relative; z-index: 1; }
     .desktop-hero-text { position: relative; z-index: 1; }
     .desktop-wordmark { font-family: 'Blacksword', cursive; font-size: 2.6rem; line-height: 1.8; display: block; padding: 14px 24px 0 0; overflow: visible; }
-    .desktop-tagline { color: var(--steel-light); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 6px; display: block; opacity: 0.85; }
-    
-    .desktop-tagline { color: var(--steel-light); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; display: block; opacity: 0.7; }
+    .desktop-tagline { color: var(--steel-light); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 4px; display: block; }
     .desktop-header-actions { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); z-index: 2; }
 }
 
@@ -2668,8 +2666,8 @@ async function generateExportCanvas(r) {
   estH += 60 + (r.ingredients || []).length * 50 + 50;
   tc.font = '29px Arial';
   (r.steps || []).forEach(s => { estH += Math.max(1, Math.ceil(tc.measureText(s).width / (COL - 60))) * 40 + 24; });
-  if (r.notes) estH += 160;
-  estH += 100;
+  if (r.notes) estH += 140;
+  estH += 96;
 
   const H = Math.ceil(estH / 100) * 100 + 100;
   const canvas = document.getElementById('export-canvas');
