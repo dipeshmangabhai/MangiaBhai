@@ -2669,7 +2669,7 @@ async function generateExportCanvas(r) {
   if (r.notes) estH += 140;
   estH += 96;
 
-  const H = Math.ceil(estH / 100) * 100 + 100;
+  const H = estH + 90;
   const canvas = document.getElementById('export-canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -2711,12 +2711,12 @@ async function generateExportCanvas(r) {
   ctx.font = 'bold 22px Arial';
   ctx.fillStyle = '#c8cdd6';
   ctx.letterSpacing = '4px';
-  ctx.fillText('EAT WELL, BROTHER', PAD, 134);
+  ctx.fillText('EAT WELL, BROTHER', PAD, 162);
   ctx.letterSpacing = '0px';
 
   // Divider
   ctx.strokeStyle = '#1e2028'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(PAD, 156); ctx.lineTo(W-PAD, 156); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD, 182); ctx.lineTo(W-PAD, 182); ctx.stroke();
 
   // Emoji — draw via temp canvas to preserve colour
   let y = 166;
