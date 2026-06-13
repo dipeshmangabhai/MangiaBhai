@@ -2679,6 +2679,17 @@ function openEdit(id) {
     <div class="form-group"><label>Method</label><textarea id="e-steps" style="min-height:140px;">${escHtml(stepsText)}</textarea></div>
     <div class="form-group"><label>Tips / Notes</label><textarea id="e-notes">${escHtml(r.notes||'')}</textarea></div>
     <div class="form-group"><label>✍️ My Cooking Notes</label><textarea id="e-mynotes" placeholder="Add your own observations after cooking…" style="min-height:100px;">${escHtml(r.myNotes||'')}</textarea></div>
+    <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;background:var(--black-raised);border:1px solid var(--black-border);border-radius:10px;padding:14px 16px;">
+      <div>
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--steel-light);margin-bottom:3px;">Private Recipe 🔒</div>
+        <div style="font-size:.78rem;color:var(--white-soft);opacity:.6;">Hidden from guests — only visible when unlocked</div>
+      </div>
+      <label style="position:relative;width:44px;height:24px;cursor:pointer;flex-shrink:0;">
+        <input type="checkbox" id="e-private" ${r.isPrivate ? 'checked' : ''} onchange="togglePrivateSwitch(this)" style="opacity:0;width:0;height:0;position:absolute;">
+        <span id="e-private-slider" style="position:absolute;inset:0;background:${r.isPrivate ? 'var(--steel)' : 'var(--black-border)'};border-radius:12px;transition:background .2s;"></span>
+        <span id="e-private-knob" style="position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:${r.isPrivate ? '23px' : '3px'};transition:left .2s;"></span>
+      </label>
+    </div>
     <button class="btn-save" onclick="saveEdit()">Save Changes</button>
     <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
   `;
