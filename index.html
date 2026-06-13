@@ -44,7 +44,7 @@
   }
 
   /* Header */
-  header { background: rgba(14,14,14,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(var(--safe-top) + 8px) 18px 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--black-border); overflow: visible; }
+  header { background: #0e0e0e; padding: calc(var(--safe-top) + 12px) 18px 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--black-border); overflow: visible; }
   .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 
   .btn-icon { background: #1a1c22; border: 1px solid var(--black-border); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--white-soft); font-size: 1rem; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
@@ -179,9 +179,9 @@
   .my-notes-empty { font-size:.82rem; color:rgba(240,210,80,.4); font-style:italic; }
 
   /* ── Desktop / Responsive Layout ── */
-  @media (min-width: 768px) {
 
-    /* Header */
+@media (min-width: 768px) {
+/* Header */
     header {
       padding: calc(var(--safe-top) + 12px) 40px 0;
     }
@@ -189,6 +189,7 @@
     .header-inner {
       max-width: 1200px;
       margin: 0 auto;
+      overflow: visible;
     }
 
 
@@ -375,46 +376,60 @@
       font-size: 0.95rem;
       padding: 12px 16px 12px 42px;
     }
-  }
 
-  @media (min-width: 1100px) {
-    .recipe-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  /* Desktop hero header */
-  @media (min-width: 768px) {
-    .desktop-header { display: block; }
+  /* Desktop header */
+.desktop-header { display: block; }
     .mobile-header { display: none; }
     .desktop-hero { padding: 28px 40px 22px; display: flex; align-items: center; gap: 24px; position: relative; }
     .desktop-hero::before { display: none; }
     .desktop-hero-illus { height: 90px; width: auto; flex-shrink: 0; position: relative; z-index: 1; }
     .desktop-hero-text { position: relative; z-index: 1; }
-    .desktop-wordmark { font-family: 'Blacksword', cursive; font-size: 3.2rem; line-height: 1.4; display: block; padding: 20px 20px 0 0; overflow: visible; }
-    .desktop-wordmark .wm-mangia { color: #f0f2f5; }
-    .desktop-wordmark .wm-bhai { background: linear-gradient(135deg,#8a90a0,#c8cdd6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .desktop-wordmark { font-family: 'Blacksword', cursive; font-size: 2.6rem; line-height: 1.8; display: block; padding: 14px 24px 0 0; overflow: visible; }
     .desktop-tagline { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: #5a6070; margin-top: 5px; display: block; }
     .desktop-header-actions { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); z-index: 2; }
+}
+
+@media (min-width: 1100px) {
+    .recipe-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
-  @media (max-width: 767px) {
+
+@media (max-width: 767px) {
     .desktop-header { display: none; }
     .mobile-header { display: block; }
   }
 
-  /* iOS Safari — prevent zoom on input focus */
-  input, textarea, select { font-size: 16px !important; }
-  html, body { overflow-x: hidden; max-width: 100vw; }
-
-  /* Action bar */
-  .recipe-action-bar { display:flex; gap:8px; padding:10px 18px; background:#141416; border-bottom:1px solid var(--black-border); flex-shrink:0; }
-  .recipe-action-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; background:var(--black-raised); border:1px solid var(--black-border); border-radius:10px; padding:9px 8px; font-size:0.75rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer; font-family:'Lato',sans-serif; transition:all .18s; -webkit-tap-highlight-color:transparent; }
-  .recipe-action-btn.share { color:var(--steel-light); border-color:#3a4050; }
-  .recipe-action-btn.share:active { background:#252830; }
-  .recipe-action-btn.edit { color:var(--white-soft); }
-  .recipe-action-btn.edit:active { background:#252830; }
-  .recipe-action-btn.del { color:#e05555; border-color:rgba(220,60,60,0.25); }
-  .recipe-action-btn.del:active { background:rgba(220,60,60,0.08); }
+  /* ── Site Wordmark ── */
+  .site-wordmark {
+    display: inline-block;
+    line-height: 1;
+    padding: 0.3em 0.2em 0.1em 0;
+    overflow: visible;
+  }
+  .site-wordmark .wm-white {
+    font-family: 'Blacksword', cursive;
+    font-size: 1.5rem;
+    color: #f0f2f5;
+    display: inline;
+    line-height: 1;
+  }
+  .site-wordmark .wm-steel {
+    font-family: 'Blacksword', cursive;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #8a90a0, #c8cdd6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline;
+    line-height: 1;
+  }
+  @media (min-width: 768px) {
+    .site-wordmark .wm-white,
+    .site-wordmark .wm-steel {
+      font-size: 2.8rem;
+    }
+  }
 
 </style>
 </head>
@@ -427,7 +442,7 @@
     <div class="desktop-hero" style="position:relative;">
       
       <div class="desktop-hero-text">
-        <span class="desktop-wordmark"><span class="wm-mangia">Mangia</span><span class="wm-bhai">Bhai</span></span>
+        <div class="site-wordmark"><span class="wm-white">Mangia</span><span class="wm-steel">Bhai</span></div>
         <span style="font-size:0.65rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#5a6070;margin-top:4px;display:block;">Eat Well, Live Well</span>
       </div>
       <div class="desktop-header-actions">
@@ -446,10 +461,8 @@
   <!-- Mobile header -->
   <div class="mobile-header">
     
-          <div class="header-inner"><div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 12px;overflow:visible;">
-      <div style="display:flex;align-items:flex-end;gap:0;padding:18px 16px 4px 0;overflow:visible;white-space:nowrap;">
-        <span style="font-family:'Blacksword',cursive;font-size:1.7rem;color:#f0f2f5;letter-spacing:0.01em;line-height:2;">Mangia</span><span style="font-family:'Blacksword',cursive;font-size:1.7rem;background:linear-gradient(135deg,#8a90a0,#c8cdd6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.01em;line-height:2;">Bhai</span>
-      </div>
+          <div class="header-inner"><div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 12px;overflow:visible;min-height:60px;">
+      <div class="site-wordmark"><span class="wm-white">Mangia</span><span class="wm-steel">Bhai</span></div>
       <button class="btn-icon" title="API Key" onclick="openKeyModal()">🔑</button>
     </div>
   <div class="search-wrap">
